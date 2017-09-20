@@ -3,7 +3,10 @@ import pandas as pd
 import timeit
 from pulp import *
 
-data = pd.read_csv("smallsize_test_nr.csv", delimiter=",", header=0)
+filename = "mdp.csv"
+problem_name = filename[:-4]
+# data = pd.read_csv("smallsize_test_nr.csv", delimiter=",", header=0)
+data = pd.read_csv(filename, delimiter=",", header=0)
 n_states = max(max(data['idstatefrom']) + 1, max(data['idstateto']) + 1)
 n_actions = max(data['idaction']) + 1
 states = [i for i in range(n_states)]
@@ -39,6 +42,8 @@ start_time = timeit.default_timer()
 prob.solve()
 elapsed = timeit.default_timer() - start_time
 
+# rew - sold(p-c) - [inventory]_{+}Ch + [inventory]_{-}cb
+
 val_ar = np.zeros(n_states)
 policy = np.zeros(n_states)
 
@@ -63,8 +68,9 @@ result = pd.DataFrame(
     }
 )
 result.set_index('idstate')
-result.to_csv("./policy.csv", sep=',')
-print(prob.constraints)
+result.to_csv("./" + problem_name + "_policy.csv", sep=',')
+# print(prob.constraints)
+print(val_ar)
 print(policy)
 
 # MDP TOOLBOX FROM HERE ON
