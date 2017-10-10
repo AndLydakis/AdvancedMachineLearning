@@ -90,7 +90,7 @@ y_approx = list(A @ beta)
 plt.plot(range_, y_approx)
 plt.plot(range_, y)
 plt.show()
-plt.cla();
+plt.cla()
 
 print("POLYNOMIAL DEGREE 2 FEATURES")
 A = np.column_stack((x_squared, np.column_stack((np.ones(67), np.arange(67)))))
@@ -99,7 +99,7 @@ y_approx = list(A @ beta)
 plt.plot(range_, y_approx)
 plt.plot(range_, y)
 plt.show()
-plt.cla();
+plt.cla()
 
 print("POLYNOMIAL DEGREE 3 FEATURES")
 A = np.column_stack((np.ones(67), np.arange(67)))
@@ -144,12 +144,12 @@ for o in range(tile_size):
     start = 0
     x_ = np.zeros(67)
     i = o * tile_offset
-    while (i < 67):
-        while (start <= tile_size and i < 67):
+    while i < 67:
+        while start <= tile_size and i < 67:
             x_[i] = 1
             start += 1
             i += 1
-        while (start >= 0 and i < 67):
+        while start >= 0 and i < 67:
             x_[i] = 0
             start -= 1
             i += 1
