@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
-
+__author__ = "Andreas Lydakis"
+__copyright__ = "CS980 - Advanced Reinforcement Learning - Assignment 8"
+__credits__ = ["Andreas Lydakis"]
+__license__ = "GPL"
+__version__ = "1.0.1"
+__maintainer__ = "Andreas Lydakis"
+__email__ = "andlydakis@gmail.com"
+__status__ = "Production"
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate as si
