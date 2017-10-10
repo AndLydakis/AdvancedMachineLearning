@@ -7,6 +7,7 @@ This is a temporary script file.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.interpolate as si
 
 data = {0: 94.4202,
         1: 85.2373,
@@ -82,6 +83,7 @@ x_cubed = x_squared * x
 y = list(data.values())
 y = np.array(y)
 range_ = np.arange(len(y))
+print("LINEAR FEATURES")
 A = np.column_stack((np.ones(67), np.arange(67)))
 beta = np.linalg.solve((A.T @ A), A.T @ y)
 y_approx = list(A @ beta)
@@ -90,7 +92,7 @@ plt.plot(range_, y)
 plt.show()
 plt.cla();
 
-print("LINEAR FEATURES")
+print("POLYNOMIAL DEGREE 2 FEATURES")
 A = np.column_stack((x_squared, np.column_stack((np.ones(67), np.arange(67)))))
 beta = np.linalg.solve((A.T @ A), A.T @ y)
 y_approx = list(A @ beta)
@@ -99,9 +101,10 @@ plt.plot(range_, y)
 plt.show()
 plt.cla();
 
-print("POLYNOMIAL FEATURES")
-A = np.column_stack((x_cubed,
-                     np.column_stack((x_squared, np.column_stack((np.ones(67), np.arange(67)))))))
+print("POLYNOMIAL DEGREE 3 FEATURES")
+A = np.column_stack((np.ones(67), np.arange(67)))
+A = np.column_stack((A, x_squared))
+A = np.column_stack((A, x_cubed))
 beta = np.linalg.solve((A.T @ A), A.T @ y)
 y_approx = list(A @ beta)
 plt.plot(range_, y_approx)
@@ -109,127 +112,67 @@ plt.plot(range_, y)
 plt.show()
 
 print("THREE GROUPS")
-avg1 = sum(y[0:23]) / 22
-avg3 = sum(y[23:45]) / 22
-avg2 = sum(y[45:67]) / 22
-x_ = np.zeros(67)
-x_[0:23] = 1
-x_[23:45] = 2
-x_[45:67] = 3
-A = np.column_stack((np.ones(67), x_))
+x1_ = np.zeros(67)
+x2_ = np.zeros(67)
+x3_ = np.zeros(67)
+x1_[0:23] = 1
+x1_[23:45] = 0
+x1_[45:67] = 0
+x2_[0:23] = 0
+x2_[23:45] = 1
+x2_[45:67] = 0
+x3_[0:23] = 0
+x3_[23:45] = 0
+x3_[45:67] = 1
+# A = np.column_stack((np.ones(67), x1_))
+# A = np.column_stack((A, x2_))
+# A = np.column_stack((A, x3_))
+A = np.column_stack((x1_, x2_))
+A = np.column_stack((x2_, x3_))
 beta = np.linalg.solve((A.T @ A), A.T @ y)
 y_approx = list(A @ beta)
 plt.plot(range_, y_approx)
 plt.plot(range_, y)
 plt.show()
 
-print("TILE SIZE: 4")
-tile_size = 4
-c = 0
-sum_ = 0
-x_ = np.zeros(67)
-for i in range(67):
-    sum_ += x[i]
-    c += 1
-    if c == tile_size:
-        x_[i - tile_size + 1:i + 1] = sum_ / tile_size
-        c = 0
-        sum_ = 0
-x_[i - c + 1:67] = sum_ / c
-A = np.column_stack((np.ones(67), x_))
-beta = np.linalg.solve((A.T @ A), A.T @ y)
-y_approx = list(A @ beta)
-plt.plot(range_, y_approx)
-plt.plot(range_, y)
-plt.show()
-
-print("TILE SIZE: 8")
+print("TILE SIZE: 8, OFFSET: 7")
 tile_size = 8
-c = 0
-sum_ = 0
-x_ = np.zeros(67)
-for i in range(67):
-    sum_ += x[i]
-    c += 1
-    if c == tile_size:
-        x_[i - tile_size + 1:i + 1] = sum_ / tile_size
-        c = 0
-        sum_ = 0
-x_[i - c + 1:67] = sum_ / c
-A = np.column_stack((np.ones(67), x_))
+tile_offset = 7
+start = 0
+A = np.ones(67)
+for o in range(tile_size):
+    start = 0
+    x_ = np.zeros(67)
+    i = o * tile_offset
+    while (i < 67):
+        while (start <= tile_size and i < 67):
+            x_[i] = 1
+            start += 1
+            i += 1
+        while (start >= 0 and i < 67):
+            x_[i] = 0
+            start -= 1
+            i += 1
+    A = np.column_stack((A, x_))
+
 beta = np.linalg.solve((A.T @ A), A.T @ y)
 y_approx = list(A @ beta)
 plt.plot(range_, y_approx)
 plt.plot(range_, y)
 plt.show()
 
-print("TILE SIZE: 16")
-tile_size = 16
-c = 0
-sum_ = 0
-x_ = np.zeros(67)
-for i in range(67):
-    sum_ += x[i]
-    c += 1
-    if c == tile_size:
-        x_[i - tile_size + 1:i + 1] = sum_ / tile_size
-        c = 0
-        sum_ = 0
-x_[i - c + 1:67] = sum_ / c
-A = np.column_stack((np.ones(67), x_))
-beta = np.linalg.solve((A.T @ A), A.T @ y)
-y_approx = list(A @ beta)
-plt.plot(range_, y_approx)
-plt.plot(range_, y)
-plt.show()
+knots = x[0::10]
 
-print("SPLINE SIZE: 4")
-spline_length = 4
-i = 0
-y_approx_ = np.zeros(0)
-while (i < 67):
-    x_ = x[i:min(i + spline_length, 67)]
-    # print(i, x_)
-    A = np.column_stack((np.ones(len(x_)), x_))
-    beta = np.linalg.solve((A.T @ A), A.T @ y[i:min(i + spline_length, 67)])
-    y_approx = list(A @ beta)
-    i += spline_length
-    y_approx_ = np.hstack((y_approx_, y_approx))
+t = range(67)
+ipl_t = np.linspace(0.0, 67 - 1, 100)
+y_tup = si.splrep(t, y, k=3)
+y_list = list(y_tup)
+yl = y.tolist()
+y_list[1] = yl + [0.0, 0.0, 0.0, 0.0]
+y_i = si.splev(ipl_t, y_list)
 
-plt.plot(np.arange(len(y_approx_)), y_approx_)
-plt.plot(np.arange(len(y_approx_)), y[0:len(y_approx_)])
-plt.show()
-
-print("SPLINE SIZE: 8")
-spline_length = 8
-i = 0
-y_approx_ = np.zeros(0)
-while (i < 67):
-    x_ = x[i:min(i + spline_length, 67)]
-    # print(i, x_)
-    A = np.column_stack((np.ones(len(x_)), x_))
-    beta = np.linalg.solve((A.T @ A), A.T @ y[i:min(i + spline_length, 67)])
-    y_approx = list(A @ beta)
-    i += spline_length
-    y_approx_ = np.hstack((y_approx_, y_approx))
-
-plt.plot(np.arange(len(y_approx_)), y_approx_)
-plt.plot(np.arange(len(y_approx_)), y[0:len(y_approx_)])
-plt.show()
-
-print("SPLINE SIZE: 16")
-spline_length = 16
-i = 0
-y_approx_ = np.zeros(0)
-while (i < 67):
-    x_ = x[i:min(i + spline_length, 67)]
-    # print(i, x_)
-    A = np.column_stack((np.ones(len(x_)), x_))
-    beta = np.linalg.solve((A.T @ A), A.T @ y[i:min(i + spline_length, 67)])
-    y_approx = list(A @ beta)
-    i += spline_length
-    y_approx_ = np.hstack((y_approx_, y_approx))
-
-plt.plot(np.arange(len(y_approx_)), y_approx_)
-plt.plot(np.arange(len(y_approx_)), y[0:len(y_approx_)])
+plt.plot(t, y, 'orange')
+plt.plot(ipl_t, y_i, 'cornflowerblue')
+plt.xlim([0.0, max(t)])
+plt.title('Splined y(t)')
 plt.show()
